@@ -1,16 +1,8 @@
 import sqliteCli from "./sqlite-cli.js"
-import fieldStats from "./field-stats.js"
+import fieldStats, {getColumnType} from "./field-stats.js"
 const prefix = 'csv_'
 const TYPES = ['STRING', 'REAL', 'INTEGER']
 const getFieldNames = (table) => `SELECT name FROM PRAGMA_TABLE_INFO('${table}');`
-const getColumnType = (field, table) =>`
-    SELECT
-        DISTINCT case
-            WHEN ${field} regexp '^-?\\d+\\.\\d+$' THEN 1
-            WHEN ${field} regexp '^-?[1-9]\\d*$' THEN 2
-            ELSE 0
-        END as ${field}
-    FROM ${table} WHERE ${field} <>'';`
 const defaultOptions = {
     separator :',',
     statsTable : prefix + 'stats',
@@ -37,7 +29,6 @@ export async function importCsv(dbPath, csvPath, options={}) {
     // get Types for each column
     const typesSql = fields
         .map(v => getColumnType(v, csvTable))
-    
     const ct = (await Promise.all(
         typesSql.map(oneCall)
     ))
@@ -59,10 +50,10 @@ export async function importCsv(dbPath, csvPath, options={}) {
     const _ = primaryKeyPresent
         ? ['', '']
         : [primaryKey, 'null'].map(v=>v+',')
-    const f = fields.join(',')
+    const f = fields.map(v=>'\`'+v+'\`').join(',')
     const setNullSql = fields
         .map (
-            field => `UPDATE ${csvTable} SET ${field} = NULL WHERE ${field} = '';`
+            field => `UPDATE ${csvTable} SET \`${field}\` = NULL WHERE \`${field}\` = '';`
         )
     await sequentialCalls(
         [
@@ -100,7 +91,7 @@ function createTable(name, fieldsTypes, primary) {
     let primaryKeyPresent = false
     const body = fieldsTypes.map(
         ({field, type}) => {
-            let def = `${field} ${TYPES[type]}`
+            let def = `\`${field}\` ${TYPES[type]}`
             if (field === primary) {
                 def += ' PRIMARY KEY'
                 primaryKeyPresent = true

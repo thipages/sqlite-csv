@@ -82,7 +82,7 @@ export async function importCsv(dbPath, csvPath, options={}) {
         )
     }
     const statsSql = feedStatsTable(statsTable, stats)
-    sequentialCalls(statsSql)
+    await sequentialCalls(statsSql)
     return stats
 }
 

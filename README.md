@@ -41,7 +41,7 @@ Notes
 - `type` and `sType` represents the same descriptor
 
 ## Dependencies
-it required [sqlite3](https://www.sqlite.org/download.html) >= 3.36.0  (REGEXP support) installed on the OS.
+it requires [sqlite3](https://www.sqlite.org/download.html) >= 3.36.0  (REGEXP support) installed on the OS.
 
 
 

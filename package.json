@@ -1,0 +1,27 @@
+{
+  "name": "@titsoft/sqlite-csv",
+  "version": "0.1.0",
+  "description": "Load csv in sqlite with the right types and some stats",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node test/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thipages/sqlite-csv.git"
+  },
+  "keywords": [
+    "sqlite",
+    "cli",
+    "csv",
+    "types",
+    "stats"
+  ],
+  "author": "Thierry Pagès",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/thipages/sqlite-csv/issues"
+  },
+  "homepage": "https://github.com/thipages/sqlite-csv#readme"
+}

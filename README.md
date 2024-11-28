@@ -37,7 +37,8 @@ Return value is an array of object
 - `total` total number of records
 
 Notes
--   `min`, `max` and `avg` are length-based for strings type with `null` values discarded
+- `min`, `max` and `avg` are length-based for strings type
+- `min`, `max`, `avg`, `distinct` computation discards `null` values
 - `type` and `sType` represents the same descriptor
 
 ## Dependencies

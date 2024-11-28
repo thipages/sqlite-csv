@@ -108,5 +108,16 @@ export default [
     null: 0,
     sType: 'integer',
     total: 2
+  },
+  {
+    field: 'col11',
+    type: 0,
+    min: 2,
+    max: 3,
+    avg: 2.5,
+    distinct: 2,
+    null: 0,
+    sType: 'string',
+    total: 2
   }
 ]

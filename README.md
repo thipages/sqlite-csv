@@ -4,7 +4,7 @@ Load csv in sqlite with the right types and some stats
 ## Details
 - Load the csv file into sqlite
 - Define types (`text`, `real` or `integer`) at the schema level
-  - zero leading integers are considered as string
+  - zero leading integers are considered as `text`
   - dot is used for identifying  `real` data
 - Replace empty values by `null` values
 - Define or create if not specified a primary key
@@ -37,7 +37,7 @@ Return value is an array of object
 - `total` total number of records
 
 Notes
-- `min`, `max` and `avg` are length-based for strings type
+- `min`, `max` and `avg` are length-based for `text` type
 - `min`, `max`, `avg`, `distinct` computation discards `null` values
 - `type` and `sType` represents the same descriptor
 

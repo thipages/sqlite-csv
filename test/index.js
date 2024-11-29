@@ -23,7 +23,11 @@ const descriptions = [
 describe('stats after csv import', async () => {
     const observed = await importCsv(
         path,
-        './test/test.csv'
+        './test/test.csv',
+        {
+            csvTable: 'group',
+            statsTable: 'groupStats'
+        }
     )
     for (const [index, description] of descriptions.entries()) {
         test(description, () => {

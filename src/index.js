@@ -11,7 +11,7 @@ const defaultOptions = {
 }
 export {sqliteCli}
 export async function importCsv(dbPath, csvPath, options={}) {
-    const { statsTable, separator, csvTable, primaryKey } = Object.assign(options, defaultOptions)
+    const { statsTable, separator, csvTable, primaryKey } = Object.assign(defaultOptions, options)
     const {oneCall, concurentCalls, sequentialCalls} = sqliteCli(dbPath)
     // Import CSV
     await oneCall(
@@ -53,21 +53,21 @@ export async function importCsv(dbPath, csvPath, options={}) {
     const f = fields.map(v=>'\`'+v+'\`').join(',')
     const setNullSql = fields
         .map (
-            field => `UPDATE ${csvTable} SET \`${field}\` = NULL WHERE \`${field}\` = '';`
+            field => `UPDATE \`${csvTable}\` SET \`${field}\` = NULL WHERE \`${field}\` = '';`
         )
     await sequentialCalls(
         [
             create,
-            `INSERT INTO temp (${_[0]} ${f} ) SELECT ${_[1]} ${f} FROM ${csvTable};`,
-            `DROP TABLE ${csvTable};`,
-            `ALTER TABLE temp RENAME TO ${csvTable};`,
+            `INSERT INTO temp (${_[0]} ${f} ) SELECT ${_[1]} ${f} FROM \`${csvTable}\`;`,
+            `DROP TABLE \`${csvTable}\`;`,
+            `ALTER TABLE temp RENAME TO \`${csvTable}\`;`,
             ... setNullSql
         ]
     )
     // Compute stats
     const total = (
         await oneCall(
-            `SELECT COUNT(*) AS total FROM ${csvTable};`
+            `SELECT COUNT(*) AS total FROM \`${csvTable}\`;`
         )
     )[0]
     const stats = []
@@ -101,7 +101,7 @@ function createTable(name, fieldsTypes, primary) {
     )
     if (!primaryKeyPresent) body.unshift(`${primary} INTEGER PRIMARY KEY`)
     return [
-        `CREATE TABLE ${name} ( ${body.join(',')} );`,
+        `CREATE TABLE \`${name}\` ( ${body.join(',')} );`,
         primaryKeyPresent
     ]
 }
@@ -112,11 +112,11 @@ function feedStatsTable(table, statsData) {
     const values = statsData.map(
         fieldData => {
             const sValues = Object.values(fieldData).map(v=>`'${v}'`).join(',')
-            return `INSERT INTO ${table} VALUES (${sValues});`
+            return `INSERT INTO \`${table}\` VALUES (${sValues});`
         }
     )
     return [
-        `CREATE TABLE ${table} ( ${def.join(',')} );`,
+        `CREATE TABLE \`${table}\` ( ${def.join(',')} );`,
         ...values
     ]
 }

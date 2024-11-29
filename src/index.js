@@ -1,7 +1,7 @@
 import sqliteCli from "./sqlite-cli.js"
 import fieldStats, {getColumnType} from "./field-stats.js"
 const prefix = 'csv_'
-const TYPES = ['STRING', 'REAL', 'INTEGER']
+const TYPES = ['TEXT', 'REAL', 'INTEGER']
 const getFieldNames = (table) => `SELECT name FROM PRAGMA_TABLE_INFO('${table}');`
 const defaultOptions = {
     separator :',',

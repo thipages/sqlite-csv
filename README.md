@@ -3,7 +3,7 @@ Load csv in sqlite with the right types and some stats
 
 ## Details
 - Load the csv file into sqlite
-- Define types (`string`, `real` or `integer`) at the schema level
+- Define types (`text`, `real` or `integer`) at the schema level
   - zero leading integers are considered as string
   - dot is used for identifying  `real` data
 - Replace empty values by `null` values
@@ -28,7 +28,7 @@ const stats = await importCsv(dbPath, csvPath, options)
 Return value is an array of object
 - `field`  one of the field
 - `type` 0 | 1 | 2
-- `sType` string | real | integer
+- `sType` text | real | integer
 - `distinct` number of distinct values (null not counted)
 - `null`: number of null values
 - `min` min field value

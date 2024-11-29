@@ -25,11 +25,11 @@ export default [
     field: 'col3',
     type: 0,
     min: 2,
-    max: 2,
-    avg: 2,
+    max: 3,
+    avg: 2.5,
     distinct: 2,
     null: 0,
-    sType: 'string',
+    sType: 'text',
     total: 2
   },
   {
@@ -40,7 +40,7 @@ export default [
     avg: 2.5,
     distinct: 2,
     null: 0,
-    sType: 'string',
+    sType: 'text',
     total: 2
   },
   {
@@ -51,7 +51,7 @@ export default [
     avg: 2.5,
     distinct: 2,
     null: 0,
-    sType: 'string',
+    sType: 'text',
     total: 2
   },
   {
@@ -62,7 +62,7 @@ export default [
     avg: 2.5,
     distinct: 2,
     null: 0,
-    sType: 'string',
+    sType: 'text',
     total: 2
   },
   {
@@ -112,12 +112,12 @@ export default [
   {
     field: 'col11',
     type: 0,
-    min: 2,
-    max: 3,
-    avg: 2.5,
+    min: 3,
+    max: 4,
+    avg: 3.5,
     distinct: 2,
     null: 0,
-    sType: 'string',
+    sType: 'text',
     total: 2
   }
 ]

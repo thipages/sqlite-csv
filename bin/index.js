@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import {importCsv} from './../src/index.js'
 import fs from 'node:fs'
 const args = process.argv.slice(2, process.argv.length)

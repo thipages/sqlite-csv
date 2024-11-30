@@ -6,6 +6,7 @@ export const getColumnType = (field, table) => {
         SELECT
             DISTINCT case
                 WHEN ${f} regexp '^-?\\d+\\.\\d+$' THEN 1
+                WHEN ${f} = 0 THEN 2
                 WHEN ${f} regexp '^-?[1-9]\\d*$' THEN 2
                 ELSE 0
             END as ${f}

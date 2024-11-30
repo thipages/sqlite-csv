@@ -18,7 +18,8 @@ const descriptions = [
     'integer + negative integer', // 7
     'integer + negative decimal', // 8
     'integer only with spaced column name ', // 9
-    'decimal + string ' // 10
+    'decimal + string ', // 10
+    'integer + zero (added in version 0.6.0, zero was considered as text)' // 11
 ]
 describe('stats after csv import', async () => {
     const observed = await importCsv(

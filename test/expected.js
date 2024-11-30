@@ -119,5 +119,16 @@ export default [
     null: 0,
     sType: 'text',
     total: 2
+  },
+  {
+    avg: 5,
+    distinct: 2,
+    field: 'col12',
+    max: 10,
+    min: 0,
+    null: 0,
+    sType: 'integer',
+    total: 2,
+    type: 2
   }
 ]

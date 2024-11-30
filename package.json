@@ -7,6 +7,7 @@
   "scripts": {
     "test": "node test/index.js"
   },
+  "bin": "bin/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thipages/sqlite-csv.git"

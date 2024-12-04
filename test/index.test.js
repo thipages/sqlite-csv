@@ -24,7 +24,7 @@ const descriptions = [
 describe('stats after csv import', async () => {
     const observed = await importCsv(
         path,
-        './test/test.csv',
+        './test/test1.csv',
         {
             csvTable: 'group',
             statsTable: 'groupStats'
@@ -35,4 +35,22 @@ describe('stats after csv import', async () => {
             assert.deepStrictEqual(observed[index], expected[index])
         })
     }  
+})
+describe('csv import with errors', async () => {
+    let error=''
+    try {
+            await importCsv(
+            path,
+            './test/test2.csv',
+            {
+                csvTable: 'invalid',
+                statsTable: 'invalid_stats'
+            }
+        )
+    } catch (err) {
+        error = err.message
+    }
+    test('catch of sqlite error message', () => {
+        assert.ok(error.includes('expected 2 columns but found 1 - filling the rest with NULL'))
+    })
 })

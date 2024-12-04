@@ -58,13 +58,15 @@ export async function importCsv(dbPath, csvPath, options={}) {
         .map (
             field => `UPDATE \`${csvTable}\` SET \`${field}\` = NULL WHERE \`${field}\` = '';`
         )
-    await sequentialCalls(
+    await oneCall(
         [
+            'BEGIN TRANSACTION;',
             create,
             `INSERT INTO ${tempName} (${_[0]} ${f} ) SELECT ${_[1]} ${f} FROM \`${csvTable}\`;`,
             `DROP TABLE \`${csvTable}\`;`,
             `ALTER TABLE ${tempName} RENAME TO \`${csvTable}\`;`,
-            ... setNullSql
+            ... setNullSql,
+            'COMMIT;'
         ]
     )
     // Compute stats

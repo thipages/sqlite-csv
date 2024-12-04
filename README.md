@@ -20,9 +20,9 @@ const stats = await importCsv(dbPath, csvPath, options)
 ```
 ## Options object
 - `separator`:  csv separator, default `','`
-- `statsTable`: name of the stats table, default `'csv_stats'`
+- `statsTable`: name of the stats table, default `'main_stats'`
 - `csvTable`: name of the imported csv table, default `'main'`
-- `primaryKey`: name of the primary key, default `csv_id`
+- `primaryKey`: name of the primary key, default `id` (fallback `csv_id`)
     
 ## `importCsv` returned value
 Return value is an array of object

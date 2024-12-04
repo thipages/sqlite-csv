@@ -1,6 +1,6 @@
 import sqliteCli from "./sqlite-cli.js"
 import fieldStats, {getColumnType} from "./field-stats.js"
-const prefix = 'main'
+const tempTableName = () => ('temp' + Math.random()).replace('.', '')
 const TYPES = ['TEXT', 'REAL', 'INTEGER']
 const getFieldNames = (table) => `SELECT name FROM PRAGMA_TABLE_INFO('${table}');`
 const fallbackPrimaryKey = 'csv_id'
@@ -50,7 +50,8 @@ export async function importCsv(dbPath, csvPath, options={}) {
         }
     )
     // Recreate the table with the right types + set null values
-    const [create, finalPkFieldName] = createTable('temp', fieldsTypes, primaryKey, fallbackPrimaryKey)
+    const tempName = tempTableName()
+    const [create, finalPkFieldName] = createTable(tempName, fieldsTypes, primaryKey, fallbackPrimaryKey)
     const _ = [finalPkFieldName, 'null'].map(v=>v+',')
     const f = fields.map(v=>'\`'+v+'\`').join(',')
     const setNullSql = fields
@@ -60,9 +61,9 @@ export async function importCsv(dbPath, csvPath, options={}) {
     await sequentialCalls(
         [
             create,
-            `INSERT INTO temp (${_[0]} ${f} ) SELECT ${_[1]} ${f} FROM \`${csvTable}\`;`,
+            `INSERT INTO ${tempName} (${_[0]} ${f} ) SELECT ${_[1]} ${f} FROM \`${csvTable}\`;`,
             `DROP TABLE \`${csvTable}\`;`,
-            `ALTER TABLE temp RENAME TO \`${csvTable}\`;`,
+            `ALTER TABLE ${tempName} RENAME TO \`${csvTable}\`;`,
             ... setNullSql
         ]
     )

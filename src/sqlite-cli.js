@@ -14,7 +14,7 @@ function oneCall (databasePath) {
         let result = [], err = []
         const args = databasePath ? [databasePath] : []
         const cli = spawn('sqlite3', args)
-        cli.stdin.write(`${['.mode json', ...castArray(commands), '.quit',''].join('\n')}`)
+        cli.stdin.write(['.mode json', ...castArray(commands), '.quit',''].join('\n'))
         cli.stdin.end()
         return new Promise((resolve, reject) => {
             cli.stdout.on('data', (data) => {

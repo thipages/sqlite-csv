@@ -25,7 +25,9 @@ function oneCall (databasePath) {
             })
             cli.on('close', (code) => {
                 if (code !== 0) {
-                    reject(new Error('Error with code ' + code))
+                    const e = new Error('Error ' + err.join(''))
+                    e.code = code
+                    reject(e)
                 } else if (err.length !== 0) {
                     reject(new Error(err.join('')))
                 } else {

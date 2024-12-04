@@ -36,21 +36,34 @@ describe('stats after csv import', async () => {
         })
     }  
 })
-describe('csv import with errors', async () => {
-    let error=''
-    try {
-            await importCsv(
-            path,
-            './test/test2.csv',
-            {
-                csvTable: 'invalid',
-                statsTable: 'invalid_stats'
-            }
-        )
-    } catch (err) {
-        error = err.message
-    }
-    test('catch of sqlite error message', () => {
+describe('Catching errors', () => {
+
+    test('catch sqlite import error (incomplete data in column)', async () => {
+        let error=''
+        try {
+                await importCsv(
+                path,
+                './test/test2.csv',
+                {
+                    csvTable: 'invalid',
+                    statsTable: 'invalid_stats'
+                }
+            )
+        } catch (err) {
+            error = err.message
+        }
         assert.ok(error.includes('expected 2 columns but found 1 - filling the rest with NULL'))
+    })
+    test('catch sqlite query error (missing traling semi-colon)', async () =>{
+        let err = ''
+        const {oneCall}  = sqliteCli(path)
+        try {
+        await oneCall(
+            'select col1 from "group"'
+        )
+    } catch(e) {
+        err = e.message
+    }
+        assert.ok(err.includes('no such table: group.quit'))
     })
 })

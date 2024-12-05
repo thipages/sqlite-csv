@@ -3,17 +3,16 @@ import fieldStats, {getColumnType} from "./field-stats.js"
 const tempTableName = () => ('temp' + Math.random()).replace('.', '')
 const TYPES = ['TEXT', 'REAL', 'INTEGER']
 const getFieldNames = (table) => `SELECT name FROM PRAGMA_TABLE_INFO('${table}');`
-const fallbackPrimaryKey = 'csv_id'
-const defaultOptions = {
+const defaultOptions = () =>({
     separator :',',
     statsTable : 'main_stats',
     csvTable: 'main',
     primaryKey: 'id'
-}
+})
 export {sqliteCli}
 export async function importCsv(dbPath, csvPath, options={}) {
     const { statsTable, separator, csvTable, primaryKey } = Object.assign(
-        defaultOptions,
+        defaultOptions(),
         options
     )
     const {oneCall, concurentCalls, sequentialCalls} = sqliteCli(dbPath)
@@ -51,8 +50,10 @@ export async function importCsv(dbPath, csvPath, options={}) {
     )
     // Recreate the table with the right types + set null values
     const tempName = tempTableName()
-    const [create, finalPkFieldName] = createTable(tempName, fieldsTypes, primaryKey, fallbackPrimaryKey)
-    const _ = [finalPkFieldName, 'null'].map(v=>v+',')
+    const [create, existingPkField] = createTable(tempName, fieldsTypes, primaryKey)
+    const _ = existingPkField
+        ? ['', '']
+        : [primaryKey, 'null'].map(v=>v+',')
     const f = fields.map(v=>'\`'+v+'\`').join(',')
     const setNullSql = fields
         .map (
@@ -92,22 +93,22 @@ export async function importCsv(dbPath, csvPath, options={}) {
 }
 
 
-function createTable(name, fieldsTypes, pkFieldName, fallbackPkFieldName) {
-    let finalPkFieldName = pkFieldName
+function createTable(name, fieldsTypes, pkFieldName) {
+    let existingPkField = false
     const body = fieldsTypes.map(
         ({field, type}) => {
             let def = `\`${field}\` ${TYPES[type]}`
             if (field === pkFieldName) {
                 def += ' PRIMARY KEY'
-                finalPkFieldName = field
+                existingPkField = true
             }
             return def
         }
     )
-    body.unshift(`${finalPkFieldName} INTEGER PRIMARY KEY`)
+    if (!existingPkField) body.unshift(`${pkFieldName} INTEGER PRIMARY KEY`)
     return [
         `CREATE TABLE \`${name}\` ( ${body.join(',')} );`,
-        finalPkFieldName
+        existingPkField
     ]
 }
 function feedStatsTable(table, statsData) {

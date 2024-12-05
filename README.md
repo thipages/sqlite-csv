@@ -25,7 +25,7 @@ const stats = await importCsv(dbPath, csvPath, options)
 - `primaryKey`: name of the primary key, default `id` (fallback `csv_id`)
     
 ## `importCsv` returned value
-Return value is an array of object
+returns an array of object
 - `field`  one of the field
 - `type` 0 | 1 | 2
 - `sType` text | real | integer

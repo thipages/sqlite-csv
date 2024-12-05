@@ -9,7 +9,6 @@ const defaultOptions = () =>({
     csvTable: 'main',
     primaryKey: 'id'
 })
-export {sqliteCli}
 export async function importCsv(dbPath, csvPath, options={}) {
     const { statsTable, separator, csvTable, primaryKey } = Object.assign(
         defaultOptions(),

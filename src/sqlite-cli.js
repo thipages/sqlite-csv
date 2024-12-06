@@ -5,7 +5,6 @@ export default function (databasePath, asArray = false) {
     const _ = oneCall(databasePath, asArray)
     return {
         oneCall: _,
-        concurentCalls: concurentCalls(_),
         sequentialCalls: sequentialCalls(_),
     }
 }
@@ -31,7 +30,7 @@ function oneCall (databasePath, asArray = false) {
                 } else if (err.length !== 0) {
                     reject(new Error(err.join('')))
                 } else {
-                const data = result.join('').trim() || '[]'
+                    const data = result.join('').trim() || '[]'
                     try {
                         const json = JSON.parse(data)
                         resolve(asArray ? jsonArrayTo2dArray(json) : json)
@@ -44,15 +43,10 @@ function oneCall (databasePath, asArray = false) {
         })
     }
 }
-function concurentCalls(oneCall) {
-    return function (commandsArray) {
-        return Promise.all(castArray(commandsArray).map(oneCall))
-    }
-}
 function sequentialCalls(oneCall) {
     return async function (commandsArray) {
         const results = []
-        for (const commands of castArray(commandsArray)) {
+        for (const commands of commandsArray) {
             results.push(await oneCall(commands))
         }
         return results

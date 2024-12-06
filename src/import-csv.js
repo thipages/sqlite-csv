@@ -78,7 +78,7 @@ export async function importCsv(dbPath, csvPath, options={}) {
     )[0]
     const stats = []
     for (const fieldStat of fieldStats(fieldsTypes, csvTable)) {
-        const fStats = Object.assign({}, ...(await concurentCalls(fieldStat)).flat())
+        const fStats = Object.assign({}, ...(await sequentialCalls(fieldStat)).flat())
         stats.push(
             Object.assign(
                 fStats,

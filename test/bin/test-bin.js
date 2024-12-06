@@ -4,7 +4,7 @@ import assert from 'node:assert/strict'
 import path from 'node:path'
 import { deleteDbFile } from '../misc.js'
 import sqliteCli from '../../src/sqlite-cli.js'
-describe ('bin test', () => {
+describe ('npx test', () => {
     test('with database name', async() => {
         const relativeDir = './test/bin'
         const dbName = 'test.db'

@@ -1,15 +1,15 @@
 import { spawn } from 'node:child_process'
 
 const castArray = a => Array.isArray(a) ? a : [a]
-export default function (databasePath) {
-    const _ = oneCall(databasePath)
+export default function (databasePath, asArray = false) {
+    const _ = oneCall(databasePath, asArray)
     return {
         oneCall: _,
         concurentCalls: concurentCalls(_),
         sequentialCalls: sequentialCalls(_),
     }
 }
-function oneCall (databasePath) {
+function oneCall (databasePath, asArray = false) {
     return function (commands) {
         let result = [], err = []
         const args = databasePath ? [databasePath] : []
@@ -33,7 +33,8 @@ function oneCall (databasePath) {
                 } else {
                 const data = result.join('').trim() || '[]'
                     try {
-                        resolve(JSON.parse(data))
+                        const json = JSON.parse(data)
+                        resolve(asArray ? jsonArrayTo2dArray(json) : json)
                     } catch(e) {
                         reject(new Error('JSON parse Error'))
                     }
@@ -56,4 +57,12 @@ function sequentialCalls(oneCall) {
         }
         return results
     }
+}
+function jsonArrayTo2dArray(jsonArray) {
+    if (jsonArray[0] === undefined) return []
+    let array=[Object.keys(jsonArray[0])]
+    for (const json of jsonArray) {
+        array.push(Object.values(json))
+    }
+    return array
 }

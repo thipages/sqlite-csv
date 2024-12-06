@@ -1,6 +1,6 @@
 import { importCsv } from "../src/index.js"
 import expected from './expected-stats.js'
-import test, {describe, after} from 'node:test'
+import test, {describe, after, before} from 'node:test'
 import assert from 'node:assert/strict'
 import  {csvPath, dbPath, deleteDbFile} from './misc.js'
 const descriptions = [
@@ -18,15 +18,20 @@ const descriptions = [
     'integer + zero (added in version 0.6.0, zero was considered as text)' // 11
 ]
 
-describe('stats after csv import', async () => {
-    const path = dbPath('stats.db')
+describe('stats after csv import', () => {
+    let observed
+    const path = dbPath()
     after(()=> deleteDbFile(path))
-    const observed = await importCsv(
-        path,
-        csvPath('test1.csv'),
-        {
-            csvTable: 'aTable',
-            statsTable: 'aTable_stats'
+    before(
+        async() => {
+            observed = await importCsv(
+                path,
+                csvPath('test1.csv'),
+                {
+                    csvTable: 'aTable',
+                    statsTable: 'aTable_stats'
+                }
+            )
         }
     )
     for (const [index, description] of descriptions.entries()) {

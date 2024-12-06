@@ -1,5 +1,6 @@
 import fs from 'node:fs'
-export const dbPath = (name) => './test/' + name
+import path from 'node:path'
+export const dbPath = () => './test/' + getBase()
 export const csvPath = (name) => './test/csv-samples/' + name
 export function deleteDbFile(path) {
     try {
@@ -7,4 +8,8 @@ export function deleteDbFile(path) {
     } catch (e) {
         
     }
+}
+function getBase() {
+    const filePath = global.process.argv[1]
+    return path.basename(filePath, path.extname(filePath)).replace(/-/g, '_')
 }

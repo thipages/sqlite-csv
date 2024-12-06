@@ -4,7 +4,7 @@ import assert from 'node:assert/strict'
 import  {csvPath, dbPath, deleteDbFile} from './misc.js'
 
 describe('Catching errors', () => {
-    const path = dbPath('catching-errors.db')
+    const path = dbPath()
     after(()=>deleteDbFile(path))
     test('catch sqlite import error (incomplete data in column)', async () => {
         deleteDbFile(path)

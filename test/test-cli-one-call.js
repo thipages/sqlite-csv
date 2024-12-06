@@ -3,8 +3,8 @@ import test, {describe, after} from 'node:test'
 import assert from 'node:assert/strict'
 import  {csvPath, dbPath, deleteDbFile} from './misc.js'
 
-describe('sqlite-cli oneCall tests', async () => {
-    const path = dbPath('sqlite-cli.db')
+describe('sqlite-cli oneCall tests', () => {
+    const path = dbPath()
     after(() => deleteDbFile(path))
     test('oneCall JSON query tests', async () => {
         deleteDbFile(path)

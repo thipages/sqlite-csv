@@ -3,8 +3,8 @@ import test, {describe, after} from 'node:test'
 import assert from 'node:assert/strict'
 import  {csvPath, dbPath, deleteDbFile} from './misc.js'
 
-describe('Test primary key', async () => {
-    const path = dbPath('pk.db')
+describe('Test primary key', () => {
+    const path = dbPath()
     after(() => deleteDbFile(path))
     test('Non existing default primary key insertion', async () => {
         deleteDbFile(path)

@@ -1,1 +1,2 @@
-`node --test` at the root of the project
+Launch `node --test` at the root of the project
+

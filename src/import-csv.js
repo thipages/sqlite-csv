@@ -1,11 +1,12 @@
 import sqliteCli from "./sqlite-cli.js"
-import fieldStats, {getColumnType} from "./field-stats.js"
+import fieldStats, {getColumnType} from './field-stats.js'
+import {STATS_SUFFIX} from './utils.js'
 const tempTableName = () => ('temp' + Math.random()).replace('.', '')
 const TYPES = ['TEXT', 'REAL', 'INTEGER']
 const getFieldNames = (table) => `SELECT name FROM PRAGMA_TABLE_INFO('${table}');`
 const defaultOptions = () =>({
     separator :',',
-    statsTable : 'main_stats',
+    statsTable : 'main' + STATS_SUFFIX,
     csvTable: 'main',
     primaryKey: 'id'
 })

@@ -1,14 +1,14 @@
 # sqlite-csv
-Load csv in sqlite with the right types and some stats
+Load csv in sqlite with the right types and some stats via `sqlite cli`.
 
-## Details
-- Load the csv file into sqlite
-- Define types (`text`, `real` or `integer`) at the schema level
+## What it does
+- Loads the csv file into sqlite
+- Defines types (`text`, `real` or `integer`) at the schema level
   - zero leading integers are considered as `text`
   - dot is used for identifying  `real` data
-- Replace empty values by `null` values
-- Define or create if not specified a primary key
-- Create a table with basic statistics for each field
+- Replaces empty values by `null` values
+- Defines or create if not specified a primary key
+- Creates a table with basic statistics for each field
 
 ## Usage
 `npm i @titsoft/sqlite-csv`
@@ -20,10 +20,10 @@ const stats = await importCsv(dbPath, csvPath, options)
 ```
 ## Options object
 - `separator`:  csv separator, default `','`
-- `statsTable`: name of the stats table, default `'main_stats'`
 - `csvTable`: name of the imported csv table, default `'main'`
-- `primaryKey`: name of the primary key, default `id` (fallback `csv_id`)
-    
+- `statsTable`: name of the stats table, default `'main_stats'`,
+- `primaryKey`: name of the primary key, default `id`
+
 ## `importCsv` returned value
 returns an array of object
 - `field`  one of the field

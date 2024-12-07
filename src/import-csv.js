@@ -4,7 +4,7 @@ import {STATS_SUFFIX} from './utils.js'
 const tempTableName = () => ('temp' + Math.random()).replace('.', '')
 const TYPES = ['TEXT', 'REAL', 'INTEGER']
 const getFieldNames = (table) => `SELECT name FROM PRAGMA_TABLE_INFO('${table}');`
-const defaultOptions = () =>({
+const defaultOptions = () => ({
     separator :',',
     statsTable : 'main' + STATS_SUFFIX,
     csvTable: 'main',
@@ -15,13 +15,11 @@ export async function importCsv(dbPath, csvPath, options={}) {
         defaultOptions(),
         options
     )
-    const {oneCall, concurentCalls, sequentialCalls} = sqliteCli(dbPath)
+    const {oneCall, sequentialCalls} = sqliteCli(dbPath)
     // Import CSV
     await oneCall(
-        [
-            '.separator ' + separator,
-            `.import ${csvPath} ` + csvTable           
-        ]
+        '.separator ' + separator,
+        `.import ${csvPath} ` + csvTable           
     )
     // Get fields names
     const fields = (
@@ -31,11 +29,13 @@ export async function importCsv(dbPath, csvPath, options={}) {
     ).map(v => v.name)
     // get Types for each column
     const typesSql = fields
-        .map(v => getColumnType(v, csvTable))
-    const ct = (await Promise.all(
-        typesSql.map(oneCall)
-    ))
-    const columnTypes = ct.map (
+        .map(v => [getColumnType(v, csvTable)])
+    //console.log('typesSql',  typesSql)
+    const columnTypes = (
+        await sequentialCalls(
+            ...typesSql
+        )
+    ).map (
         v => v.map (v => Object.values(v)).flat()
     )
     const fieldsTypes = columnTypes.map (
@@ -60,7 +60,6 @@ export async function importCsv(dbPath, csvPath, options={}) {
             field => `UPDATE \`${csvTable}\` SET \`${field}\` = NULL WHERE \`${field}\` = '';`
         )
     await oneCall(
-        [
             'BEGIN TRANSACTION;',
             create,
             `INSERT INTO ${tempName} (${_[0]} ${f} ) SELECT ${_[1]} ${f} FROM \`${csvTable}\`;`,
@@ -68,7 +67,6 @@ export async function importCsv(dbPath, csvPath, options={}) {
             `ALTER TABLE ${tempName} RENAME TO \`${csvTable}\`;`,
             ... setNullSql,
             'COMMIT;'
-        ]
     )
     // Compute stats
     const total = (
@@ -78,7 +76,10 @@ export async function importCsv(dbPath, csvPath, options={}) {
     )[0]
     const stats = []
     for (const fieldStat of fieldStats(fieldsTypes, csvTable)) {
-        const fStats = Object.assign({}, ...(await sequentialCalls(fieldStat)).flat())
+        const fStats = Object.assign(
+            {},
+            ...(await sequentialCalls(...fieldStat)).flat()
+        )
         stats.push(
             Object.assign(
                 fStats,
@@ -88,7 +89,7 @@ export async function importCsv(dbPath, csvPath, options={}) {
         )
     }
     const statsSql = feedStatsTable(statsTable, stats)
-    await sequentialCalls(statsSql)
+    await sequentialCalls(...statsSql)
     return stats
 }
 

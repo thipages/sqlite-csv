@@ -13,10 +13,8 @@ describe ('npx test', () => {
         await run(relativeDir, dbName)
         const {sequentialCalls} = sqliteCli(dbPath)
         const observed = await sequentialCalls(
-            [
-                'select col1 from test1 limit 1;',
-                'select col1 from test2 limit 1;'
-            ]
+            'select col1 from test1 limit 1;',
+            'select col1 from test2 limit 1;'
         )
         assert.deepStrictEqual(
             observed, [

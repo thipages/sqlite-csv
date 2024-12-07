@@ -9,11 +9,12 @@ export default function (databasePath, asArray = false) {
     }
 }
 function oneCall (databasePath, asArray = false) {
-    return function (commands) {
+    return function (...commands) {
+        //console.log('ONE CALL COMMANDS', commands)
         let result = [], err = []
         const args = databasePath ? [databasePath] : []
         const cli = spawn('sqlite3', args)
-        cli.stdin.write(['.mode json', ...castArray(commands), '.quit',''].join('\n'))
+        cli.stdin.write(['.mode json', ...commands, '.quit',''].join('\n'))
         cli.stdin.end()
         return new Promise((resolve, reject) => {
             cli.stdout.on('data', (data) => {
@@ -35,6 +36,7 @@ function oneCall (databasePath, asArray = false) {
                         const json = JSON.parse(data)
                         resolve(asArray ? jsonArrayTo2dArray(json) : json)
                     } catch(e) {
+                        console.log('DATA', data)
                         reject(new Error('JSON parse Error'))
                     }
                 }
@@ -44,10 +46,14 @@ function oneCall (databasePath, asArray = false) {
     }
 }
 function sequentialCalls(oneCall) {
-    return async function (commandsArray) {
+    return async function (...commands) {
         const results = []
-        for (const commands of commandsArray) {
-            results.push(await oneCall(commands))
+        for (const command of commands) {
+            if (Array.isArray(command)) {
+                results.push(await oneCall(...command))
+            } else {
+                results.push(await oneCall(command))
+            }            
         }
         return results
     }

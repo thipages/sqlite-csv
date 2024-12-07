@@ -10,16 +10,12 @@ describe('sqlite-cli oneCall tests', () => {
         deleteDbFile(path)
         const { oneCall, sequentialCalls } = sqliteCli(path)
         await oneCall(
-            [
-                '.separator ,',
-                `.import ${csvPath('test1.csv')} main`
-            ]
+            '.separator ,',
+            `.import ${csvPath('test1.csv')} main`
         )
         const observed = await sequentialCalls(
-            [
-                [`select col1 from main limit 1;`],
-                [`select col1 from main limit 1;`]
-            ]
+            `select col1 from main limit 1;`,
+            `select col1 from main limit 1;`
         )
         assert.deepStrictEqual(
             observed, [
@@ -32,13 +28,11 @@ describe('sqlite-cli oneCall tests', () => {
         deleteDbFile(path)
         const { sequentialCalls } = sqliteCli(path)
         const observed =await sequentialCalls(
-            [
                 [
                     '.separator ,',
                     `.import ${csvPath('test1.csv')} main`,
                 ],
-                [`select col1 from main limit 1;`]
-            ]
+                `select col1 from main limit 1;`
         )
         assert.deepStrictEqual(
             observed, [

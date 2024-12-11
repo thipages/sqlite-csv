@@ -31,7 +31,6 @@ export async function importCsv(dbPath, csvPath, options={}) {
     // get Types for each column
     const typesSql = fields
         .map(v => [getColumnType(v, csvTable)])
-    //console.log('typesSql',  typesSql)
     const columnTypes = (
         await runCommands(
             ...typesSql

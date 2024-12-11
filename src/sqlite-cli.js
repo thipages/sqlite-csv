@@ -1,18 +1,17 @@
 import { spawn } from 'node:child_process'
 const EMPTY_JSON = '""'
 const EMPTY_STRING = ''
-const castArray = a => Array.isArray(a) ? a : [a]
 export default function (databasePath, asArray = false) {
     return {
         runCommands: runCommands(databasePath, asArray)
     }
 }
-function oneCall (databasePath, asArray, oneQuery) {
+/*function oneCall (databasePath, asArray) {
     return function (...commands) {
-        return _oneCall (databasePath, asArray, oneQuery)(...commands)
+        return _oneCall (databasePath, asArray)(...commands)
     }
-}
-function _oneCall (databasePath, asArray, oneQuery) {
+}*/
+function oneCall (databasePath, asArray) {
     return function (...commands) {
         let result = [], err = []
         const args = databasePath ? [databasePath] : []
@@ -55,12 +54,12 @@ function runCommands(databasePath, asArray) {
         if (len === 0) return EMPTY_STRING
         for (const command of commands) {
             if (Array.isArray(command)) {
-                results.push(await oneCall(databasePath, asArray, false)(...command))                
+                results.push(await oneCall(databasePath, asArray)(...command))                
             } else {
-                results.push(await oneCall(databasePath, asArray, true)([command]))
+                results.push(await oneCall(databasePath, asArray)([command]))
             }            
         }
-        return oneQuery ? results[0] : results;
+        return oneQuery ? results[0] : results
     }
 }
 function jsonArrayTo2dArray(jsonArray) {

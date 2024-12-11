@@ -15,15 +15,16 @@ export async function importCsv(dbPath, csvPath, options={}) {
         defaultOptions(),
         options
     )
-    const {oneCall, sequentialCalls} = sqliteCli(dbPath)
+    const {runCommands} = sqliteCli(dbPath)
     // Import CSV
-    await oneCall(
-        '.separator ' + separator,
-        `.import ${csvPath} ` + csvTable           
+    await runCommands(
+        ['.separator ' + separator,
+        `.import ${csvPath} ` + csvTable
+        ]        
     )
     // Get fields names
     const fields = (
-        await oneCall(
+        await runCommands(
             getFieldNames(csvTable)
         )
     ).map(v => v.name)
@@ -32,7 +33,7 @@ export async function importCsv(dbPath, csvPath, options={}) {
         .map(v => [getColumnType(v, csvTable)])
     //console.log('typesSql',  typesSql)
     const columnTypes = (
-        await sequentialCalls(
+        await runCommands(
             ...typesSql
         )
     ).map (
@@ -59,7 +60,8 @@ export async function importCsv(dbPath, csvPath, options={}) {
         .map (
             field => `UPDATE \`${csvTable}\` SET \`${field}\` = NULL WHERE \`${field}\` = '';`
         )
-    await oneCall(
+    await runCommands(
+        [
             'BEGIN TRANSACTION;',
             create,
             `INSERT INTO ${tempName} (${_[0]} ${f} ) SELECT ${_[1]} ${f} FROM \`${csvTable}\`;`,
@@ -67,10 +69,11 @@ export async function importCsv(dbPath, csvPath, options={}) {
             `ALTER TABLE ${tempName} RENAME TO \`${csvTable}\`;`,
             ... setNullSql,
             'COMMIT;'
+        ]
     )
     // Compute stats
     const total = (
-        await oneCall(
+        await runCommands(
             `SELECT COUNT(*) AS total FROM \`${csvTable}\`;`
         )
     )[0]
@@ -78,7 +81,7 @@ export async function importCsv(dbPath, csvPath, options={}) {
     for (const fieldStat of fieldStats(fieldsTypes, csvTable)) {
         const fStats = Object.assign(
             {},
-            ...(await sequentialCalls(...fieldStat)).flat()
+            ...(await runCommands(...fieldStat)).flat()
         )
         stats.push(
             Object.assign(
@@ -89,7 +92,7 @@ export async function importCsv(dbPath, csvPath, options={}) {
         )
     }
     const statsSql = feedStatsTable(statsTable, stats)
-    await sequentialCalls(...statsSql)
+    await runCommands(...statsSql)
     return stats
 }
 

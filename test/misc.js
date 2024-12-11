@@ -2,6 +2,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 export const dbPath = () => './test/' + getBase()
 export const csvPath = (name) => './test/csv-samples/' + name
+export const MODE_ARRAY = 'array'
+export const MODE_JSON = 'json'
 export function deleteDbFile(path) {
     try {
         fs.unlinkSync(path)

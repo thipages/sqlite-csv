@@ -30,9 +30,9 @@ describe('Catching errors', () => {
             path,
             csvPath('test1.csv')
         )
-        const {oneCall}  = sqliteCli(path)
+        const {runCommands}  = sqliteCli(path)
         try {
-        await oneCall(
+        await runCommands(
             'select col1 from main'
         )
     } catch(e) {

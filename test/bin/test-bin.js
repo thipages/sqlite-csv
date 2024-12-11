@@ -11,8 +11,8 @@ describe ('npx test', () => {
         const dbPath = path.join(path.resolve(relativeDir), dbName)
         deleteDbFile(dbPath)
         await run(relativeDir, dbName)
-        const {sequentialCalls} = sqliteCli(dbPath)
-        const observed = await sequentialCalls(
+        const {runCommands} = sqliteCli(dbPath)
+        const observed = await runCommands(
             'select col1 from test1 limit 1;',
             'select col1 from test2 limit 1;'
         )

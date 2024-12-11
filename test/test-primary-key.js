@@ -1,5 +1,5 @@
 import { importCsv, sqliteCli } from "../src/index.js"
-import test, {describe, after} from 'node:test'
+import test, {describe, after, run} from 'node:test'
 import assert from 'node:assert/strict'
 import  {csvPath, dbPath, deleteDbFile} from './misc.js'
 
@@ -16,8 +16,8 @@ describe('Test primary key', () => {
                 statsTable: 'pk_test1_stats'
             }
         )
-        const { oneCall } = sqliteCli(path)
-        const observed = await oneCall(
+        const { runCommands } = sqliteCli(path)
+        const observed = await runCommands(
             'select id from pk_test1;'
         )
         assert.deepStrictEqual(observed,
@@ -35,8 +35,8 @@ describe('Test primary key', () => {
                 primaryKey: 'pk'
             }
         )
-        const { oneCall } = sqliteCli(path)
-        const observed = await oneCall(
+        const { runCommands } = sqliteCli(path)
+        const observed = await runCommands(
             'select pk from pk_test1;'
         )
         assert.deepStrictEqual(observed,
@@ -53,8 +53,8 @@ describe('Test primary key', () => {
                 statsTable: 'pk_test3_stats',
             }
         )
-        const { oneCall } = sqliteCli(path)
-        const observed = await oneCall(
+        const { runCommands } = sqliteCli(path)
+        const observed = await runCommands(
             'select id from pk_test3;'
         )
         assert.deepStrictEqual(observed,

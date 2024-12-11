@@ -1,16 +1,19 @@
 import { spawn } from 'node:child_process'
-
+const EMPTY_JSON = '""'
+const EMPTY_STRING = ''
 const castArray = a => Array.isArray(a) ? a : [a]
 export default function (databasePath, asArray = false) {
-    const _ = oneCall(databasePath, asArray)
     return {
-        oneCall: _,
-        sequentialCalls: sequentialCalls(_),
+        runCommands: runCommands(databasePath, asArray)
     }
 }
-function oneCall (databasePath, asArray = false) {
+function oneCall (databasePath, asArray, oneQuery) {
     return function (...commands) {
-        //console.log('ONE CALL COMMANDS', commands)
+        return _oneCall (databasePath, asArray, oneQuery)(...commands)
+    }
+}
+function _oneCall (databasePath, asArray, oneQuery) {
+    return function (...commands) {
         let result = [], err = []
         const args = databasePath ? [databasePath] : []
         const cli = spawn('sqlite3', args)
@@ -31,12 +34,11 @@ function oneCall (databasePath, asArray = false) {
                 } else if (err.length !== 0) {
                     reject(new Error(err.join('')))
                 } else {
-                    const data = result.join('').trim() || '[]'
+                    const data = result.join('').trim() || EMPTY_JSON
                     try {
                         const json = JSON.parse(data)
-                        resolve(asArray ? jsonArrayTo2dArray(json) : json)
+                        resolve(asArray ? jsonArrayTo2dArray(json): json)
                     } catch(e) {
-                        console.log('DATA', data)
                         reject(new Error('JSON parse Error'))
                     }
                 }
@@ -45,22 +47,25 @@ function oneCall (databasePath, asArray = false) {
         })
     }
 }
-function sequentialCalls(oneCall) {
+function runCommands(databasePath, asArray) {
     return async function (...commands) {
         const results = []
+        const len = commands.length
+        const oneQuery = len === 1
+        if (len === 0) return EMPTY_STRING
         for (const command of commands) {
             if (Array.isArray(command)) {
-                results.push(await oneCall(...command))
+                results.push(await oneCall(databasePath, asArray, false)(...command))                
             } else {
-                results.push(await oneCall(command))
+                results.push(await oneCall(databasePath, asArray, true)([command]))
             }            
         }
-        return results
+        return oneQuery ? results[0] : results;
     }
 }
 function jsonArrayTo2dArray(jsonArray) {
     if (jsonArray[0] === undefined) return []
-    let array=[Object.keys(jsonArray[0])]
+    const array=[Object.keys(jsonArray[0])]
     for (const json of jsonArray) {
         array.push(Object.values(json))
     }

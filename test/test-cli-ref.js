@@ -4,7 +4,6 @@ import assert from 'node:assert/strict'
 import  {csvPath, deleteDbFile, MODE_ARRAY, MODE_JSON} from './misc.js'
 const EMPTY_STRING = ''
 // DEV: using before (() => deleteDbFile(path)) and removing deletDBfile in each test throw error
-
 export default (path, mode) => ({
     noCommand : () => test('no command', async () => {
         deleteDbFile(path)
@@ -19,30 +18,20 @@ export default (path, mode) => ({
         deleteDbFile(path)
         const { runCommands } = sqliteCli(path, mode === MODE_ARRAY)
         const observed = await runCommands(
-            [
-                '.separator ,',
-                `.import ${csvPath('test1.csv')} main`,
-            ]
+            '.separator ,',
+            `.import ${csvPath('test1.csv')} main`,
         )
-        if (mode === MODE_JSON) {
-            assert.deepStrictEqual(
-                observed, EMPTY_STRING
-            )
-        } else {
-            assert.deepStrictEqual(
-                observed, []
-            )
-        }
+        assert.deepStrictEqual(
+            observed, EMPTY_STRING
+        )
     }),
     oneCommandTrailingQuery : () => test('one command with trailing query', async () => {
         deleteDbFile(path)
         const { runCommands } = sqliteCli(path, mode === MODE_ARRAY)
         const observed = await runCommands(
-            [
             '.separator ,',
             `.import ${csvPath('test1.csv')} main`,
             `select col1, col2 from main;`
-            ]
         )
         if (mode === MODE_JSON) {
             assert.deepStrictEqual(
@@ -63,10 +52,8 @@ export default (path, mode) => ({
         const { runCommands } = sqliteCli(path, mode === MODE_ARRAY)
         // DB creation
         await runCommands(
-            [
-                '.separator ,',
-                `.import ${csvPath('test1.csv')} main`,
-            ]
+            '.separator ,',
+            `.import ${csvPath('test1.csv')} main`,
         )
         // One string command
         const observed = await runCommands(`select col1, col2 from main;`)
@@ -89,17 +76,11 @@ export default (path, mode) => ({
     oneUpdateCommandTrailingQuery : () => test('one command UPDATE + with trailing query', async () => {
         deleteDbFile(path)
         const { runCommands } = sqliteCli(path, mode === MODE_ARRAY)
-        await runCommands(
-            [
-            '.separator ,',
-            `.import ${csvPath('test1.csv')} main`
-            ]
-        )
         const observed = await runCommands(
-            [
+            '.separator ,',
+            `.import ${csvPath('test1.csv')} main`,
             'UPDATE main SET col1 = 1;',
             `select col1 from main;`
-            ]
         )
         if (mode === MODE_JSON) {
             assert.deepStrictEqual(
@@ -114,17 +95,11 @@ export default (path, mode) => ({
     oneInsertCommandTrailingQuery : () => test('one command INSERT + with trailing query', async () => {
         deleteDbFile(path)
         const { runCommands } = sqliteCli(path, mode === MODE_ARRAY)
-        await runCommands(
-            [
-            '.separator ,',
-            `.import ${csvPath('test1.csv')} main`
-            ]
-        )
         const observed = await runCommands(
-            [
+            '.separator ,',
+            `.import ${csvPath('test1.csv')} main`,
             'INSERT INTO main (col1) VALUES (1);',
             `select col1 from main;`
-            ]
         )
         if (mode === MODE_JSON) {
             assert.deepStrictEqual(
@@ -136,26 +111,22 @@ export default (path, mode) => ({
             )
         }
     }),
-    oneInsertCommandGetLastInsertRowid : () => test.skip('one command INSERT, get last_insert_rowid', async () => {
+    oneInsertCommandGetLastInsertRowid : () => test('one command INSERT, get last_insert_rowid', async () => {
         deleteDbFile(path)
         const { runCommands } = sqliteCli(path, mode === MODE_ARRAY)
-        await runCommands(
-            [
-            '.separator ,',
-            `.import ${csvPath('test1.csv')} main`
-            ]
-        )
         const observed = await runCommands(
+            '.separator ,',
+            `.import ${csvPath('test1.csv')} main`,
             'INSERT INTO main (col1) VALUES (1);',
             'SELECT last_insert_rowid() id;'
         )
         if (mode === MODE_JSON) {
             assert.deepStrictEqual(
-                observed, []
+                observed, [{id:3}]
             )
         } else {
             assert.deepStrictEqual(
-                observed, []
+                observed, [['id'], [3]]
             )
         }
 

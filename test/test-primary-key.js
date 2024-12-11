@@ -1,5 +1,5 @@
-import { importCsv, sqliteCli } from "../src/index.js"
-import test, {describe, after, run} from 'node:test'
+import { importCsv, sqliteCli } from "./../src/index.js"
+import test, {describe, after} from 'node:test'
 import assert from 'node:assert/strict'
 import  {csvPath, dbPath, deleteDbFile} from './misc.js'
 

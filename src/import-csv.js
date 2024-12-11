@@ -18,9 +18,8 @@ export async function importCsv(dbPath, csvPath, options={}) {
     const {runCommands} = sqliteCli(dbPath)
     // Import CSV
     await runCommands(
-        ['.separator ' + separator,
-        `.import ${csvPath} ` + csvTable
-        ]        
+        '.separator ' + separator,
+        `.import ${csvPath} ` + csvTable      
     )
     // Get fields names
     const fields = (
@@ -60,15 +59,13 @@ export async function importCsv(dbPath, csvPath, options={}) {
             field => `UPDATE \`${csvTable}\` SET \`${field}\` = NULL WHERE \`${field}\` = '';`
         )
     await runCommands(
-        [
-            'BEGIN TRANSACTION;',
-            create,
-            `INSERT INTO ${tempName} (${_[0]} ${f} ) SELECT ${_[1]} ${f} FROM \`${csvTable}\`;`,
-            `DROP TABLE \`${csvTable}\`;`,
-            `ALTER TABLE ${tempName} RENAME TO \`${csvTable}\`;`,
-            ... setNullSql,
-            'COMMIT;'
-        ]
+        'BEGIN TRANSACTION;',
+        create,
+        `INSERT INTO ${tempName} (${_[0]} ${f} ) SELECT ${_[1]} ${f} FROM \`${csvTable}\`;`,
+        `DROP TABLE \`${csvTable}\`;`,
+        `ALTER TABLE ${tempName} RENAME TO \`${csvTable}\`;`,
+        ... setNullSql,
+        'COMMIT;'
     )
     // Compute stats
     const total = (

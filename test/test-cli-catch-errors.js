@@ -32,12 +32,12 @@ describe('Catching errors', () => {
         )
         const {runCommands}  = sqliteCli(path)
         try {
-        await runCommands(
-            'select col1 from main'
-        )
-    } catch(e) {
-        err = e.message
-    }
-        assert.ok(err.includes('no such table: main.quit'))
+            await runCommands(
+                'select col1 from main'
+            )
+        } catch(e) {
+            err = e.message
+        }
+        assert.ok(err.includes('Error Parse error'))
     })
 })

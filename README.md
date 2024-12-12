@@ -13,7 +13,10 @@ It requires [sqlite3](https://www.sqlite.org/download.html) >= 3.36.0  (REGEXP s
 - Creates a table with basic statistics for each field
 
 ## NPX usage
-npx command will load in `dbname` all csv files present in the folder where npx is run. Tables names match csv file names along stats tables suffixed with `_stats`. 
+npx command will load in `dbname` all csv files present in the folder where npx is run. Tables names match `csv` file names along stats tables suffixed with `_stats`. Delimiter is automatically detected but restricted to
+- the first line of the `csv` file
+- comma and semi-colon
+
 ```shell
 npx @titsoft/sqlite-csv dbname
 ```

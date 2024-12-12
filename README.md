@@ -8,6 +8,7 @@ It requires [sqlite3](https://www.sqlite.org/download.html) >= 3.36.0  (REGEXP s
 - Defines types (`text`, `real` or `integer`) at the schema level
   - zero leading integers are considered as `text`
   - dot is used for identifying  `real` data
+  - precedence order is computed as followed : `text` > `real` > `integer`
 - Replaces empty values by `null` values
 - Defines or create if not specified a primary key
 - Creates a table with basic statistics for each field

@@ -1,4 +1,4 @@
-import run from './../../src/bin.js'
+import run from './../../src/bin/index.js'
 import test, {describe} from 'node:test'
 import assert from 'node:assert/strict'
 import path from 'node:path'

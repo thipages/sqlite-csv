@@ -1,6 +1,6 @@
-import {importCsv} from './index.js'
-import {autodetectSeparator, firstLine, normalizePath} from './utils.js'
-import {STATS_SUFFIX} from './utils.js'
+import {importCsv} from '../index.js'
+import {autodetectSeparator, firstLine, normalizePath} from '../utils.js'
+import {STATS_SUFFIX} from '../utils.js'
 import fs from 'node:fs'
 import path from 'node:path'
 //

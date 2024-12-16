@@ -8,10 +8,11 @@ const defaultOptions = () => ({
     separator :',',
     statsTable : 'main' + STATS_SUFFIX,
     csvTable: 'main',
-    primaryKey: 'id'
+    primaryKey: 'id',
+    fkRelations: []
 })
 export async function importCsv(dbPath, csvPath, options={}) {
-    const { statsTable, separator, csvTable, primaryKey } = Object.assign(
+    const { statsTable, separator, csvTable, primaryKey, fkRelations } = Object.assign(
         defaultOptions(),
         options
     )
@@ -30,11 +31,14 @@ export async function importCsv(dbPath, csvPath, options={}) {
     // get Types for each column
     const typesSql = fields
         .map(v => [getColumnType(v, csvTable)])
-    const columnTypes = (
+    const ct = (
         await runCommands(
             ...typesSql
         )
-    ).map (
+    )
+    // DEV: Need to "re-array" in case of one query
+    const _ct =  ct.length === 1 ? [ct] : ct
+    const columnTypes = _ct.map (
         v => v.map (v => Object.values(v)).flat()
     )
     const fieldsTypes = columnTypes.map (
@@ -49,7 +53,7 @@ export async function importCsv(dbPath, csvPath, options={}) {
     )
     // Recreate the table with the right types + set null values
     const tempName = tempTableName()
-    const [create, existingPkField] = createTable(tempName, fieldsTypes, primaryKey)
+    const [create, existingPkField] = createTable(tempName, fieldsTypes, primaryKey, fkRelations)
     const _ = existingPkField
         ? ['', '']
         : [primaryKey, 'null'].map(v=>v+',')
@@ -93,7 +97,7 @@ export async function importCsv(dbPath, csvPath, options={}) {
 }
 
 
-function createTable(name, fieldsTypes, pkFieldName) {
+function createTable(name, fieldsTypes, pkFieldName, fkRelations) {
     let existingPkField = false
     const body = fieldsTypes.map(
         ({field, type}) => {
@@ -106,6 +110,10 @@ function createTable(name, fieldsTypes, pkFieldName) {
         }
     )
     if (!existingPkField) body.unshift(`${pkFieldName} INTEGER PRIMARY KEY`)
+    
+    if (fkRelations.length !== 0) {
+        body.push(...fkRelations)
+    }
     return [
         `CREATE TABLE \`${name}\` ( ${body.join(',')} );`,
         existingPkField

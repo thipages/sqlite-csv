@@ -1,4 +1,4 @@
-import { importCsv } from "../src/index.js"
+import { importCsv, sqliteCli } from "../src/index.js"
 import expected from './expected-stats.js'
 import test, {describe, after, before} from 'node:test'
 import assert from 'node:assert/strict'
@@ -17,7 +17,24 @@ const descriptions = [
     'decimal + string ', // 10
     'integer + zero (added in version 0.6.0, zero was considered as text)' // 11
 ]
-
+describe('one column import', () => {
+    const path = dbPath()
+    after(()=>deleteDbFile(path))
+    test('one column import)', async () => {
+        deleteDbFile(path)
+        await importCsv(
+            path,
+            csvPath('test0.csv')
+        )
+        const { runCommands } = sqliteCli(path)
+        const observed = await runCommands(
+            'select col1 from main;'
+        )
+        assert.deepStrictEqual(
+            observed, [ { col1: 10 }, { col1: 20 } ]
+        )
+    })
+})
 describe('stats after csv import', () => {
     let observed
     const path = dbPath()

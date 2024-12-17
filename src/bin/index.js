@@ -1,34 +1,56 @@
-import {importCsv} from '../index.js'
-import {autodetectSeparator, firstLine, normalizePath} from '../utils.js'
-import {STATS_SUFFIX} from '../utils.js'
 import fs from 'node:fs'
 import path from 'node:path'
+import {importCsv, sqliteCli} from '../index.js'
+import {autodetectSeparator, firstLine, normalizePath} from '../utils.js'
+import {STATS_SUFFIX} from '../utils.js'
+import { parseFks } from './utils.js'
+import { recreateTable } from '../sql/create-table.js'
+import { wrapTransaction } from '../sql/pragma.js'
 //
-export default async function(currentDir, dbName) {
+const EXT = ".csv"
+export default async function(currentDir, dbName, options) {
+    const fks = options?.fk ? parseFks(options.fk) : []
     const files = fs.readdirSync(currentDir)
     const csvFiles = files.filter((filename) => {
         return path.extname(filename) === '.csv'
     }).map(
         filename => {
             const ext = path.extname(filename)
-            return [
-                path.basename(filename, ext),
-                ext
-            ]
+            return path.basename(filename, ext)
         }
     )
-    for (const [base, ext] of csvFiles) {        
-        const csvPath =  normalizePath(path.join(currentDir, base + ext))
-        const dbPath = normalizePath(path.join(currentDir, dbName))
+    const tableStats = {}
+    const dbPath = normalizePath(path.join(currentDir, dbName))
+    const { runCommands } = sqliteCli(dbPath)
+    for (const base of csvFiles) { 
+        const csvPath =  normalizePath(path.join(currentDir, base + EXT))
         const _ = await firstLine(csvPath)
         const separator = autodetectSeparator(_)
-        await importCsv(
-            dbPath, csvPath, {
+        const _fkRelations = fks
+            .filter (v => v.name === base) [0]
+            ?.foreignKeys
+            ?.map(v => v.sql) || []
+        const stats = await importCsv(
+            dbPath,
+            csvPath, {
                 separator,
                 csvTable: base,
-                statsTable: base + STATS_SUFFIX
+                statsTable: base + STATS_SUFFIX,
+                fkRelations: _fkRelations
             }
         )
+        tableStats[base] = stats.map(v=>({field: v.field, type: v.type}))
+        tableStats[base].fk = _fkRelations
     }
+    const orders = csvFiles.map(
+        table => {
+            const fieldsTypes = tableStats[table]
+            const fk = fieldsTypes.fk
+            return recreateTable(table, fieldsTypes, 'id', fk)
+        }
+    ).flat()
+    await runCommands(
+        ... wrapTransaction(orders)
+    )
 }
 

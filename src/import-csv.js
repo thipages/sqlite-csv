@@ -1,9 +1,9 @@
 import sqliteCli from "./sqlite-cli.js"
-import fieldStats, {getColumnType} from './field-stats.js'
-import {STATS_SUFFIX} from './utils.js'
-const tempTableName = () => ('temp' + Math.random()).replace('.', '')
-const TYPES = ['TEXT', 'REAL', 'INTEGER']
-const getFieldNames = (table) => `SELECT name FROM PRAGMA_TABLE_INFO('${table}');`
+import columnType from "./sql/column-type.js"
+import { recreateTable } from "./sql/create-table.js"
+import { wrapTransaction, getFieldNames } from "./sql/pragma.js"
+import { STATS_SUFFIX } from './utils.js'
+import { createStatsTable } from "./stats.js"
 const defaultOptions = () => ({
     separator :',',
     statsTable : 'main' + STATS_SUFFIX,
@@ -22,6 +22,18 @@ export async function importCsv(dbPath, csvPath, options={}) {
         '.separator ' + separator,
         `.import ${csvPath} ` + csvTable      
     )
+    // Get fields types
+    const fieldsTypes = await getFieldsTypesFromCsvTable(csvTable, runCommands)
+    // Recreate csvTable with the right types
+    await runCommands(
+        ...wrapTransaction(
+            recreateTable(csvTable, fieldsTypes, primaryKey, fkRelations)
+        )
+    )
+    // Stats table creation
+    return createStatsTable(csvTable, statsTable, fieldsTypes, runCommands)
+}
+async function getFieldsTypesFromCsvTable(csvTable, runCommands) {
     // Get fields names
     const fields = (
         await runCommands(
@@ -30,7 +42,7 @@ export async function importCsv(dbPath, csvPath, options={}) {
     ).map(v => v.name)
     // get Types for each column
     const typesSql = fields
-        .map(v => [getColumnType(v, csvTable)])
+        .map(v => [columnType(v, csvTable)])
     const ct = (
         await runCommands(
             ...typesSql
@@ -41,7 +53,7 @@ export async function importCsv(dbPath, csvPath, options={}) {
     const columnTypes = _ct.map (
         v => v.map (v => Object.values(v)).flat()
     )
-    const fieldsTypes = columnTypes.map (
+    return columnTypes.map (
         (columnType, i) => {
             const type = columnType.length === 1
                 ? columnType[0]
@@ -51,86 +63,4 @@ export async function importCsv(dbPath, csvPath, options={}) {
             return { field, type }
         }
     )
-    // Recreate the table with the right types + set null values
-    const tempName = tempTableName()
-    const [create, existingPkField] = createTable(tempName, fieldsTypes, primaryKey, fkRelations)
-    const _ = existingPkField
-        ? ['', '']
-        : [primaryKey, 'null'].map(v=>v+',')
-    const f = fields.map(v=>'\`'+v+'\`').join(',')
-    const setNullSql = fields
-        .map (
-            field => `UPDATE \`${csvTable}\` SET \`${field}\` = NULL WHERE \`${field}\` = '';`
-        )
-    await runCommands(
-        'BEGIN TRANSACTION;',
-        create,
-        `INSERT INTO ${tempName} (${_[0]} ${f} ) SELECT ${_[1]} ${f} FROM \`${csvTable}\`;`,
-        `DROP TABLE \`${csvTable}\`;`,
-        `ALTER TABLE ${tempName} RENAME TO \`${csvTable}\`;`,
-        ... setNullSql,
-        'COMMIT;'
-    )
-    // Compute stats
-    const total = (
-        await runCommands(
-            `SELECT COUNT(*) AS total FROM \`${csvTable}\`;`
-        )
-    )[0]
-    const stats = []
-    for (const fieldStat of fieldStats(fieldsTypes, csvTable)) {
-        const fStats = Object.assign(
-            {},
-            ...(await runCommands(...fieldStat)).flat()
-        )
-        stats.push(
-            Object.assign(
-                fStats,
-                {sType:TYPES[fStats.type].toLowerCase()},
-                total
-            )
-        )
-    }
-    const statsSql = feedStatsTable(statsTable, stats)
-    await runCommands(...statsSql)
-    return stats
-}
-
-
-function createTable(name, fieldsTypes, pkFieldName, fkRelations) {
-    let existingPkField = false
-    const body = fieldsTypes.map(
-        ({field, type}) => {
-            let def = `\`${field}\` ${TYPES[type]}`
-            if (field === pkFieldName) {
-                def += ' PRIMARY KEY'
-                existingPkField = true
-            }
-            return def
-        }
-    )
-    if (!existingPkField) body.unshift(`${pkFieldName} INTEGER PRIMARY KEY`)
-    
-    if (fkRelations.length !== 0) {
-        body.push(...fkRelations)
-    }
-    return [
-        `CREATE TABLE \`${name}\` ( ${body.join(',')} );`,
-        existingPkField
-    ]
-}
-function feedStatsTable(table, statsData) {
-    const def = Object.keys(statsData[0]).map (
-        field => `'${field}' TEXT`
-    )
-    const values = statsData.map(
-        fieldData => {
-            const sValues = Object.values(fieldData).map(v=>`'${v}'`).join(',')
-            return `INSERT INTO \`${table}\` VALUES (${sValues});`
-        }
-    )
-    return [
-        `CREATE TABLE \`${table}\` ( ${def.join(',')} );`,
-        ...values
-    ]
 }

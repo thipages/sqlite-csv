@@ -5,9 +5,8 @@ const ran = ('' + Math.random()).replace('.', '')
 const querySeparation = {
     query: `SELECT '${ran}' as _;`,
     result: `[{"_":"${ran}"}]`,
-    regexp: /^\s*SELECT|WITH/i
+    regexp: /^\s*(SELECT|WITH)/i
 }
-const castArray = a => Array.isArray(a) ? a : [a]
 export default function (databasePath, asArray = false) {
     return {
         runCommands: runCommands(databasePath, asArray)

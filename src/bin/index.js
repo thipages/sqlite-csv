@@ -10,6 +10,8 @@ import { wrapTransaction } from '../sql/pragma.js'
 const EXT = ".csv"
 export default async function(currentDir, dbName, options) {
     const fks = options?.fk ? parseFks(options.fk) : []
+    const sqlLoaderPath = options?.sql[0] || null
+    //
     const files = fs.readdirSync(currentDir)
     const csvFiles = files.filter((filename) => {
         return path.extname(filename) === '.csv'
@@ -54,5 +56,8 @@ export default async function(currentDir, dbName, options) {
     await runCommands(
         ... wrapTransaction(orders)
     )
+    console.log(sqlLoaderPath)
+    await runCommands(
+        sqlLoaderPath ? fs.readFileSync(sqlLoaderPath) : ''
+    )
 }
-

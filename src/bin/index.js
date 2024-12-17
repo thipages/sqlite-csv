@@ -44,7 +44,6 @@ export default async function(currentDir, dbName, options) {
         tableStats[base] = stats.map(v=>({field: v.field, type: v.type}))
         tableStats[base].fk = _fkRelations
     }
-    console.log('fks', fks[0].foreignKeys)
     const orders = csvFiles.map(
         table => {
             const fieldsTypes = tableStats[table]

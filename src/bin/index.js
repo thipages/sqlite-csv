@@ -1,4 +1,4 @@
-import fs from 'node:fs'
+import fs, { unlink } from 'node:fs'
 import path from 'node:path'
 import {importCsv, sqliteCli} from '../index.js'
 import {autodetectSeparator, firstLine, normalizePath} from '../utils.js'
@@ -21,6 +21,8 @@ export default async function(currentDir, dbName, options) {
     )
     const tableStats = {}
     const dbPath = normalizePath(path.join(currentDir, dbName))
+    // remove database if exists
+    try {unlink(dbPath)} catch(e) {}
     const { runCommands } = sqliteCli(dbPath)
     for (const base of csvFiles) { 
         const csvPath =  normalizePath(path.join(currentDir, base + EXT))

@@ -1,4 +1,4 @@
-import fs, { unlink } from 'node:fs'
+import fs, { unlinkSync } from 'node:fs'
 import path from 'node:path'
 import {importCsv, sqliteCli} from '../index.js'
 import {autodetectSeparator, firstLine, normalizePath} from '../utils.js'
@@ -22,7 +22,7 @@ export default async function(currentDir, dbName, options) {
     const tableStats = {}
     const dbPath = normalizePath(path.join(currentDir, dbName))
     // remove database if exists
-    try {unlink(dbPath)} catch(e) {}
+    try {unlinkSync(dbPath)} catch(e) {}
     const { runCommands } = sqliteCli(dbPath)
     for (const base of csvFiles) { 
         const csvPath =  normalizePath(path.join(currentDir, base + EXT))
@@ -44,6 +44,7 @@ export default async function(currentDir, dbName, options) {
         tableStats[base] = stats.map(v=>({field: v.field, type: v.type}))
         tableStats[base].fk = _fkRelations
     }
+    console.log('fks', fks[0].foreignKeys)
     const orders = csvFiles.map(
         table => {
             const fieldsTypes = tableStats[table]

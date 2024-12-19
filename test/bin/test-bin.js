@@ -24,4 +24,40 @@ describe ('npx test', () => {
         )
         deleteDbFile(dbPath)
     })
+    test('with -sql option and valid file path', async() => {
+        const relativeDir = './test/bin'
+        const dbName = 'test.db'
+        const dbPath = path.join(path.resolve(relativeDir), dbName)
+        const sqlFilePath = path.join(path.resolve(relativeDir), 'insert.sql')
+        deleteDbFile(dbPath)
+        await run(relativeDir, dbName, {
+            sql:  [sqlFilePath]
+        })
+        const {runCommands} = sqliteCli(dbPath)
+        const observed = await runCommands(
+            'select count(*) C from test1;'
+        )
+        assert.deepStrictEqual(
+            observed, [ { C: 3 } ]
+        )
+        deleteDbFile(dbPath)
+    })
+    test('with -sql option and invalid file path', async() => {
+        const relativeDir = './test/bin'
+        const dbName = 'test.db'
+        const dbPath = path.join(path.resolve(relativeDir), dbName)
+        const sqlFilePath = path.join(path.resolve(relativeDir), 'insert2.sql')
+        deleteDbFile(dbPath)
+        await run(relativeDir, dbName, {
+            sql:  [sqlFilePath]
+        })
+        const {runCommands} = sqliteCli(dbPath)
+        const observed = await runCommands(
+            'select count(*) C from test1;'
+        )
+        assert.deepStrictEqual(
+            observed, [ { C: 2 } ]
+        )
+        deleteDbFile(dbPath)
+    })
 })

@@ -21,6 +21,6 @@ export function parseFks(array) {
 
 // [refTable, fkTable, fkField] | undefined
 function parseFk(s) {
-    const res = s.match(/\s*(\w|-+)\s*(\w|\-+)\s*\(\s*(\w|\-+)\s*\)\s*/)
+    const res = s.match(/\s*([a-zA-Z_][a-zA-Z0-9_]{0,127})\s*([a-zA-Z_][a-zA-Z0-9_]{0,127})\s*\(\s*([a-zA-Z_][a-zA-Z0-9_]{0,127})\s*\)\s*/)
     return res?.slice(1)
 }

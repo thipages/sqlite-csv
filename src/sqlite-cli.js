@@ -34,7 +34,8 @@ function oneCall (databasePath, asArray) {
                 if (code !== 0) {
                     reject(new Error(`sqlite3 process exited with code ${code}: ${err.join('')}`))
                 } else if (err.length !== 0) {
-                    reject(new Error(err.join('')))
+                    // Handle non-empty stderr with exit code 0
+                    reject(new Error(`sqlite3 process completed with warnings/errors: ${err.join('')}`));
                 } else {
                     const data = result.join('').trim() || EMPTY_JSON
                     const resultsArray = data.split(querySeparation.result).filter( v=> v.trim() !== '')

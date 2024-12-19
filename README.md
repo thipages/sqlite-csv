@@ -19,8 +19,8 @@ npx command will load in `dbname` all csv files present in the folder where npx 
 - comma and semi-colon
 
 ### Options
-`-fk`: add foreign key(s) with the following syntax `-fk "referenceTable fkTable(fkField)"`
--`-sql` : add a sql post-treatment like `-sql sqlFilePath`
+- `-fk`: add foreign key(s) with the following syntax `-fk "referenceTable fkTable(fkField)"`
+- `-sql` : add a sql post-treatment like `-sql sqlFilePath`
 
 ```shell
 npx @titsoft/sqlite-csv dbname

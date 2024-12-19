@@ -38,6 +38,6 @@ describe('Catching errors', () => {
         } catch(e) {
             err = e.message
         }
-        assert.ok(err.includes('Error Parse error'))
+        assert.ok(err.includes('Parse error near line 2'))
     })
 })

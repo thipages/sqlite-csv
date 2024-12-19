@@ -26,11 +26,13 @@ function oneCall (databasePath, asArray) {
             cli.stderr.on('data', (data) => { 
                 err.push(data.toString())           
             })
+            // Handle process errors
+            cli.on('error', (err) => {
+                reject(new Error(`Failed to start sqlite3 process: ${err.message}`))
+            })
             cli.on('close', (code) => {
                 if (code !== 0) {
-                    const e = new Error('Error ' + err.join(''))
-                    e.code = code
-                    reject(e)
+                    reject(new Error(`sqlite3 process exited with code ${code}: ${err.join('')}`))
                 } else if (err.length !== 0) {
                     reject(new Error(err.join('')))
                 } else {

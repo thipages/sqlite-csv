@@ -55,7 +55,7 @@ function oneCall (databasePath, asArray) {
     }
 }
 function runCommands(databasePath, asArray) {
-    return async function (...commands) {
+    return function (...commands) {
         return oneCall(databasePath, asArray)(
             parseCommands(commands)
         )

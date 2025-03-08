@@ -50,6 +50,18 @@ async function getFieldsTypesFromCsvTable(csvTable, runCommands) {
     )
     // DEV: Need to "re-array" in case of one query
     const _ct =  ct.length === 1 ? [ct] : ct
+    // Check for missing columns (all empty columns)
+    if (_ct.length !== fields.length) {
+        const ctFields = _ct.map (
+            v => Object.keys(v[0])
+        ).flat()
+        // identify and add missing columns
+        for (const field of fields) {
+            if (!ctFields.includes(field)) {
+                _ct.push([{[field]: 0}])
+            }
+        }
+    }
     const columnTypes = _ct.map (
         v => v.map (v => Object.values(v)).flat()
     )

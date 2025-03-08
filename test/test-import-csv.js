@@ -35,6 +35,24 @@ describe('one column import', () => {
         )
     })
 })
+describe('two columns import with second null column', () => {
+    const path = dbPath()
+    after(()=>deleteDbFile(path))
+    test('two columns import with second null column)', async () => {
+        deleteDbFile(path)
+        await importCsv(
+            path,
+            csvPath('test5.csv')
+        )
+        const { runCommands } = sqliteCli(path)
+        const observed = await runCommands(
+            'select col1, col2 from main;'
+        )
+        assert.deepStrictEqual(
+            observed, [ { col1: 10, col2: null }, { col1: 20, col2: null } ]
+        )
+    })
+})
 describe('stats after csv import', () => {
     let observed
     const path = dbPath()

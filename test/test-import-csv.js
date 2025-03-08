@@ -15,7 +15,9 @@ const descriptions = [
     'integer + negative decimal', // 8
     'integer only with spaced column name ', // 9
     'decimal + string ', // 10
-    'integer + zero (added in version 0.6.0, zero was considered as text)' // 11
+    'integer + zero (added in version 0.6.0, zero was considered as text)', // 11
+    'all empty', // 12
+    'column (eg integer) after an all emptycolumn (added in version 0.9.3, due to a shift indiced by null column )', // 13
 ]
 describe('one column import', () => {
     const path = dbPath()
@@ -38,7 +40,7 @@ describe('one column import', () => {
 describe('two columns import with second null column', () => {
     const path = dbPath()
     after(()=>deleteDbFile(path))
-    test('two columns import with second null column)', async () => {
+    test('two columns import with second null column', async () => {
         deleteDbFile(path)
         await importCsv(
             path,
@@ -50,6 +52,24 @@ describe('two columns import with second null column', () => {
         )
         assert.deepStrictEqual(
             observed, [ { col1: 10, col2: null }, { col1: 20, col2: null } ]
+        )
+    })
+})
+describe('two columns import with first null column', () => {
+    const path = dbPath()
+    after(()=>deleteDbFile(path))
+    test('two columns import with first null column', async () => {
+        deleteDbFile(path)
+        await importCsv(
+            path,
+            csvPath('test6.csv')
+        )
+        const { runCommands } = sqliteCli(path)
+        const observed = await runCommands(
+            'select col1, col2 from main;'
+        )
+        assert.deepStrictEqual(
+            observed, [ { col1: null, col2: 10 }, { col1: null, col2: 20 } ]
         )
     })
 })

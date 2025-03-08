@@ -56,9 +56,10 @@ async function getFieldsTypesFromCsvTable(csvTable, runCommands) {
             v => Object.keys(v[0])
         ).flat()
         // identify and add missing columns
-        for (const field of fields) {
+        for (const [index, field] of fields.entries()) {
             if (!ctFields.includes(field)) {
-                _ct.push([{[field]: 0}])
+                // Insert the missing column at the right place
+                _ct.splice(index, 0, [{[field]: 0}])
             }
         }
     }

@@ -130,5 +130,27 @@ export default [
     sType: 'integer',
     total: 2,
     type: 2
+  },
+  {
+    avg: null,
+    distinct: 0,
+    field: 'col13',
+    max: null,
+    min: null,
+    null: 2,
+    sType: 'text',
+    total: 2,
+    type: 0
+  },
+  {
+    field: 'col14',
+    type: 2,
+    min: 10,
+    max: 20,
+    avg: 15,
+    distinct: 2,
+    null: 0,
+    sType: 'integer',
+    total: 2
   }
 ]

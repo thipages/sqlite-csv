@@ -30,3 +30,7 @@ export function normalizePath (value) {
     ? value.replace(/\\/g, '/')
     : value
 }
+export function getFkSqlFromDefinition(definition) {
+  const {table, column, references} = definition
+  return `FOREIGN KEY("${column}") REFERENCES "${table}"(${references})`
+}

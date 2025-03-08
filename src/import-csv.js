@@ -2,7 +2,7 @@ import sqliteCli from "./sqlite-cli.js"
 import columnType from "./sql/column-type.js"
 import { recreateTable } from "./sql/create-table.js"
 import { wrapTransaction, getFieldNames } from "./sql/pragma.js"
-import { STATS_SUFFIX } from './utils.js'
+import { getFkSqlFromDefinition, STATS_SUFFIX } from './utils.js'
 import { createStatsTable } from "./stats.js"
 const defaultOptions = () => ({
     separator :',',
@@ -23,17 +23,22 @@ export async function importCsv(dbPath, csvPath, options={}) {
         `.import ${csvPath} ` + csvTable      
     )
     // Get fields types
-    const fieldsTypes = await getFieldsTypesFromCsvTable(csvTable, runCommands)
+    const fieldsTypes = await getFieldsTypesFromCsvTable(csvTable, runCommands, fkRelations)
     // Recreate csvTable with the right types
     await runCommands(
         ...wrapTransaction(
-            recreateTable(csvTable, fieldsTypes, primaryKey, fkRelations)
+            recreateTable(
+                csvTable,
+                fieldsTypes,
+                primaryKey,
+                fkRelations.map(getFkSqlFromDefinition)
+            )
         )
     )
     // Stats table creation
     return createStatsTable(csvTable, statsTable, fieldsTypes, runCommands)
 }
-async function getFieldsTypesFromCsvTable(csvTable, runCommands) {
+async function getFieldsTypesFromCsvTable(csvTable, runCommands, fkRelations) {
     // Get fields names
     const fields = (
         await runCommands(
@@ -56,10 +61,13 @@ async function getFieldsTypesFromCsvTable(csvTable, runCommands) {
             v => Object.keys(v[0])
         ).flat()
         // identify and add missing columns
+        const fkColumns = fkRelations.map(v => v.column)
         for (const [index, field] of fields.entries()) {
             if (!ctFields.includes(field)) {
                 // Insert the missing column at the right place
-                _ct.splice(index, 0, [{[field]: 0}])
+                // if the column is a foreign key, type is integer else text
+                const type = fkColumns.includes(field) ? 2 : 0
+                _ct.splice(index, 0, [{[field]: type}])
             }
         }
     }

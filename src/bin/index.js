@@ -1,7 +1,7 @@
 import fs, { unlinkSync } from 'node:fs'
 import path from 'node:path'
 import {importCsv, sqliteCli} from '../index.js'
-import {autodetectSeparator, firstLine, normalizePath} from '../utils.js'
+import {autodetectSeparator, firstLine, getFkSqlFromDefinition, normalizePath} from '../utils.js'
 import {STATS_SUFFIX} from '../utils.js'
 import { parseFks } from './utils.js'
 import { recreateTable } from '../sql/create-table.js'
@@ -34,7 +34,10 @@ export default async function(currentDir, dbName, options) {
         const _fkRelations = fks
             .filter (v => v.name === base) [0]
             ?.foreignKeys
-            ?.map(v => v.sql) || []
+            ?.map(v => {
+                const {sql, ...definition} = v
+                return definition // {table, column, references}
+            }) || []
         const stats = await importCsv(
             dbPath,
             csvPath, {
@@ -45,7 +48,7 @@ export default async function(currentDir, dbName, options) {
             }
         )
         tableStats[base] = stats.map(v=>({field: v.field, type: v.type}))
-        tableStats[base].fk = _fkRelations
+        tableStats[base].fk = _fkRelations.map(getFkSqlFromDefinition)
     }
     const orders = csvFiles.map(
         table => {

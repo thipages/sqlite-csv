@@ -7,10 +7,12 @@ export const tempTableName = () => ('temp' + Math.random()).replace('.', '')
 // Auto-detection is limited to comma and semi-colon
 // It proceeds at the first line only
 export function autodetectSeparator(firstLine) {
-    const lens = [',', ';'].map(
+  const delimiters = [',', ';','\t']
+    const lens = delimiters.map(
         s => firstLine.split(s).length
     )
-    return lens[0] > lens[1] ? ',' : ';'
+    const max = Math.max(...lens)
+    return delimiters[lens.findIndex (v => v === max)]
 }
 export async function firstLine(path) {
     const readable = fs.createReadStream(path)

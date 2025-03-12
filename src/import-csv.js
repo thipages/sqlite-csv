@@ -19,7 +19,7 @@ export async function importCsv(dbPath, csvPath, options={}) {
     const {runCommands} = sqliteCli(dbPath)
     // Import CSV
     await runCommands(
-        '.separator ' + separator,
+        `.separator  "${separator}"`,
         `.import ${csvPath} ` + csvTable      
     )
     // Get fields types

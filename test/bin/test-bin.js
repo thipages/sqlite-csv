@@ -24,6 +24,25 @@ describe ('npx test', () => {
         )
         deleteDbFile(dbPath)
     })
+    test('with tab delimiter', async() => {
+        const relativeDir = './test/bin'
+        const dbName = 'test.db'
+        const dbPath = path.join(path.resolve(relativeDir), dbName)
+        deleteDbFile(dbPath)
+        await run(relativeDir, dbName)
+        const {runCommands} = sqliteCli(dbPath)
+        const observed = await runCommands(
+            'select col1 from test1 limit 1;',
+            'select fk from test2 limit 1;'
+        )
+        assert.deepStrictEqual(
+            observed, [
+                [{col1:10}],
+                [{fk:1}]
+            ]
+        )
+        deleteDbFile(dbPath)
+    })
     test('with -sql option and valid file path', async() => {
         const relativeDir = './test/bin'
         const dbName = 'test.db'

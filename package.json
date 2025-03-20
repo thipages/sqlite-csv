@@ -1,6 +1,6 @@
 {
   "name": "@titsoft/sqlite-csv",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "description": "Load csv in sqlite with the right types and some stats",
   "main": "src/index.js",
   "type": "module",

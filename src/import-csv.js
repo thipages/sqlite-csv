@@ -22,8 +22,14 @@ export async function importCsv(dbPath, csvPath, options={}) {
         `.separator  "${separator}"`,
         `.import ${csvPath} ` + csvTable      
     )
+    // Count records
+    const {total} = (
+        await runCommands(
+            `SELECT COUNT(*) AS total FROM \`${csvTable}\`;`
+        )
+    )[0]
     // Get fields types
-    const fieldsTypes = await getFieldsTypesFromCsvTable(csvTable, runCommands, fkRelations)
+    const fieldsTypes = await getFieldsTypesFromCsvTable(csvTable, total, runCommands, fkRelations, primaryKey)
     // Recreate csvTable with the right types
     await runCommands(
         ...wrapTransaction(
@@ -38,7 +44,7 @@ export async function importCsv(dbPath, csvPath, options={}) {
     // Stats table creation
     return createStatsTable(csvTable, statsTable, fieldsTypes, runCommands)
 }
-async function getFieldsTypesFromCsvTable(csvTable, runCommands, fkRelations) {
+async function getFieldsTypesFromCsvTable(csvTable, total, runCommands, fkRelations, primaryKey) {
     // Get fields names
     const fields = (
         await runCommands(
@@ -74,7 +80,7 @@ async function getFieldsTypesFromCsvTable(csvTable, runCommands, fkRelations) {
     const columnTypes = _ct.map (
         v => v.map (v => Object.values(v)).flat()
     )
-    return columnTypes.map (
+    const finalColumnTypes = columnTypes.map (
         (columnType, i) => {
             const type = columnType.length === 1
                 ? columnType[0]
@@ -84,4 +90,11 @@ async function getFieldsTypesFromCsvTable(csvTable, runCommands, fkRelations) {
             return { field, type }
         }
     )
+    // DEV: Case of no data and id column
+    // id field is set to integer
+    if (total === 0) {
+        const index = finalColumnTypes.findIndex( v => v.field === primaryKey)
+        if (index!== -1) finalColumnTypes[index].type = 2
+    }
+    return finalColumnTypes
 }

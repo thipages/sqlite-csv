@@ -6,6 +6,7 @@ export function getStats(csvTable, fieldsTypes, runCommands) {
 export async function createStatsTable(csvTable, statsTable, fieldsTypes, runCommands) {
     const stats = await getStats(csvTable, fieldsTypes, runCommands)
     const createAndFeedSql = getSqlForCreatingAndFeedingStatsTable(statsTable, stats)
+    console.log(createAndFeedSql)
     await runCommands(...createAndFeedSql)
     return stats
 }

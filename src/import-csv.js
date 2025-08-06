@@ -18,18 +18,22 @@ export async function importCsv(dbPath, csvPath, options={}) {
     )
     const {runCommands} = sqliteCli(dbPath)
     // Import CSV
+    console.log('Import started at ' + new Date)
     await runCommands(
         `.separator  "${separator}"`,
         `.import ${csvPath} ` + csvTable      
     )
+    console.log('Import finished at ' + new Date)
     // Count records
     const {total} = (
         await runCommands(
             `SELECT COUNT(*) AS total FROM \`${csvTable}\`;`
         )
     )[0]
+    console.log(`Total records : ${ total} `)
     // Get fields types
     const fieldsTypes = await getFieldsTypesFromCsvTable(csvTable, total, runCommands, fkRelations, primaryKey)
+    console.log(`All fields types computed at `+ new Date)
     // Recreate csvTable with the right types
     await runCommands(
         ...wrapTransaction(
@@ -41,6 +45,7 @@ export async function importCsv(dbPath, csvPath, options={}) {
             )
         )
     )
+    
     // Stats table creation
     return createStatsTable(csvTable, statsTable, fieldsTypes, runCommands)
 }

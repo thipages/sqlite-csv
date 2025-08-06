@@ -1,8 +1,8 @@
-import { TYPES, tempTableName } from "../utils.js"
+import { TYPES, uniqueTempId } from "../utils.js"
 // Recreate the table with the right types + set null values
 export function recreateTable(csvTable, fieldsTypes, primaryKey, fkRelations) {
     const fields = fieldsTypes.map(v => v.field)
-    const tempName = tempTableName()
+    const tempName = uniqueTempId()
     const [create, existingPkField] = createTable(tempName, fieldsTypes, primaryKey, fkRelations)
     const _ = existingPkField
         ? ['', '']

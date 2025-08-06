@@ -3,7 +3,8 @@ import path from 'node:path'
 import readline from 'readline'
 export const STATS_SUFFIX = '_stats'
 export const TYPES = ['TEXT', 'REAL', 'INTEGER']
-export const tempTableName = () => ('temp' + Math.random()).replace('.', '')
+let counter = 0
+export const uniqueTempId = () => ('temp' + (counter++)).replace('.', '')
 // Auto-detection is limited to comma and semi-colon
 // It proceeds at the first line only
 export function autodetectSeparator(firstLine) {

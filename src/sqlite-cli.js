@@ -1,7 +1,8 @@
 import { spawn } from 'node:child_process'
+import { uniqueTempId } from './utils.js'
 const EMPTY_JSON = '""'
 const EMPTY_STRING = ''
-const ran = ('' + Math.random()).replace('.', '')
+const ran = uniqueTempId()
 const querySeparation = {
     query: `SELECT '${ran}' as _;`,
     result: `[{"_":"${ran}"}]`,
@@ -13,7 +14,7 @@ export default function (databasePath, asArray = false) {
     }
 }
 function oneCall (databasePath, asArray) {
-    return function (commands) {        
+    return function (commands) {     
         let result = [], err = []
         const args = databasePath ? [databasePath] : []
         const cli = spawn('sqlite3', args)
@@ -24,7 +25,7 @@ function oneCall (databasePath, asArray) {
                 result.push(data.toString())
             })
             cli.stderr.on('data', (data) => { 
-                err.push(data.toString())           
+                    err.push(data.toString()) 
             })
             // Handle process errors
             cli.on('error', (err) => {

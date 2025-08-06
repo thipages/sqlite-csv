@@ -44,8 +44,7 @@ export async function importCsv(dbPath, csvPath, options={}) {
                 fkRelations.map(getFkSqlFromDefinition)
             )
         )
-    )
-    
+    )   
     // Stats table creation
     return createStatsTable(csvTable, statsTable, fieldsTypes, runCommands)
 }
